@@ -4,7 +4,7 @@ import { OcrPanel } from '../components/translator/OcrPanel'
 import { GokturkOutput } from '../components/translator/GokturkOutput'
 import { TransparencyPanel } from '../components/translator/TransparencyPanel'
 import { preprocessImage } from '../lib/ocr/preprocess'
-import { performOcr, OcrProgressUpdate, OcrResult } from '../lib/ocr/tesseract-client'
+import { performOcr, OcrProgressUpdate, OcrResult, PSM } from '../lib/ocr/tesseract-client'
 import { runBenguNetOcr } from '../lib/ocr/bengunet-client'
 import { convertToGokturk, ConversionMode, WritingDirection, SeparatorStyle } from '../lib/gokturk/convert'
 import { Camera, Keyboard, Sparkles, Cpu } from 'lucide-react'
@@ -45,13 +45,6 @@ export const Translate: React.FC = () => {
     })
 
     try {
-      // 1. Görüntüyü ölçekle ve kontrastı artır
-      const { processedCanvas } = await preprocessImage(canvas, {
-        crop: { x: 0.01, y: 0.02, width: 0.98, height: 0.96 },
-        maxDimension: 1800,
-        applyThreshold: false
-      })
-
       let recognizedText = ''
       let confidenceScore = 0
       let activeEngine = 'Tesseract v5.1 (Türkçe Sözlük)'
@@ -61,62 +54,99 @@ export const Translate: React.FC = () => {
         activeEngine = 'BengüNet AI (Özel PyTorch CNN)'
         setOcrProgress({
           status: 'recognizing',
-          progress: 50,
+          progress: 40,
           message: 'BengüNet yapay zekâsı harfleri çözümlüyor...'
         })
         try {
-          const pred = await runBenguNetOcr(processedCanvas)
+          const { processedCanvas: benguCanvas } = await preprocessImage(canvas, {
+            crop: { x: 0.06, y: 0.15, width: 0.88, height: 0.70 },
+            maxDimension: 1600,
+            applyThreshold: false
+          })
+          const pred = await runBenguNetOcr(benguCanvas)
           if (pred.text && pred.text.trim().length > 0) {
             recognizedText = pred.text
             confidenceScore = pred.confidence
           }
         } catch (netErr) {
-          console.warn('BengüNet hatası, Tesseract yedeğine geçiliyor:', netErr)
+          console.warn('BengüNet hatası:', netErr)
         }
       }
 
-      // Tesseract ile ana veya yedek okuma
+      // Tesseract Çok Aşamalı Akıllı Okuma (El Yazısı ve Türkçe için En Yüksek Doğruluk)
       if (!recognizedText || engineType === 'tesseract') {
         activeEngine = 'Tesseract v5.1 (Türkçe Sözlük)'
+
+        // AŞAMA 1: Odaklanmış Merkez Alan (ROI) + Bradley-Roth Yerel Adaptif Filtreleme (Gölge ve Işık Düşmanı)
         setOcrProgress({
           status: 'recognizing',
-          progress: 60,
-          message: 'Türkçe yazı taranıyor ve okunuyor...'
+          progress: 45,
+          message: 'El yazısı taranıyor (Gölge filtreleme)...'
         })
-        const tessResult = await performOcr(processedCanvas, (update) => {
-          setOcrProgress(update)
-        })
-        if (tessResult.text && tessResult.text.trim().length > 0) {
-          recognizedText = tessResult.text
-          confidenceScore = tessResult.confidence
-        }
-      }
 
-      // 2. Geçiş: Ham görüntü ile Leptonica adaptif okuma dene
-      if (!recognizedText) {
-        setOcrProgress({
-          status: 'recognizing',
-          progress: 80,
-          message: 'Gelişmiş adaptif filtreleme ile tekrar okunuyor...'
-        })
-        const rawResult = await performOcr(canvas)
-        if (rawResult.text && rawResult.text.trim().length > 0) {
-          recognizedText = rawResult.text
-          confidenceScore = rawResult.confidence
-        }
-      }
-
-      // 3. Geçiş: Yüksek kontrastlı Otsu binarize görüntü ile son şans dene
-      if (!recognizedText) {
-        const { processedCanvas: binarizedCanvas } = await preprocessImage(canvas, {
-          crop: { x: 0.01, y: 0.02, width: 0.98, height: 0.96 },
+        const { processedCanvas: adaptiveRoiCanvas } = await preprocessImage(canvas, {
+          crop: { x: 0.05, y: 0.14, width: 0.90, height: 0.72 },
           maxDimension: 1800,
-          applyThreshold: true
+          applyThreshold: true,
+          adaptive: true
         })
-        const retryResult = await performOcr(binarizedCanvas)
-        if (retryResult.text && retryResult.text.trim().length > 0) {
-          recognizedText = retryResult.text
-          confidenceScore = retryResult.confidence
+
+        const pass1 = await performOcr(adaptiveRoiCanvas, (update) => setOcrProgress(update), PSM.SINGLE_BLOCK)
+
+        if (pass1.text && pass1.text.trim().length > 0 && pass1.confidence >= 50) {
+          recognizedText = pass1.text
+          confidenceScore = pass1.confidence
+        }
+
+        // AŞAMA 2: Eğer Aşama 1 yetersiz kaldıysa, Yüksek Kontrastlı Gri Tonlama ile Dene
+        if (!recognizedText || confidenceScore < 60) {
+          setOcrProgress({
+            status: 'recognizing',
+            progress: 65,
+            message: 'Yüksek kontrast analizi uygulanıyor...'
+          })
+
+          const { processedCanvas: grayRoiCanvas } = await preprocessImage(canvas, {
+            crop: { x: 0.05, y: 0.14, width: 0.90, height: 0.72 },
+            maxDimension: 1800,
+            applyThreshold: false
+          })
+
+          const pass2 = await performOcr(grayRoiCanvas, undefined, PSM.SINGLE_BLOCK)
+
+          if (pass2.text && pass2.text.trim().length > 0 && pass2.confidence > confidenceScore) {
+            recognizedText = pass2.text
+            confidenceScore = pass2.confidence
+          }
+        }
+
+        // AŞAMA 3: Tek Satır Modu (PSM 7) — Özellikle "TÜRK", "BİLGE" gibi tek satırlık kelimeler için
+        if (!recognizedText || confidenceScore < 50) {
+          const pass3 = await performOcr(adaptiveRoiCanvas, undefined, PSM.SINGLE_LINE)
+          if (pass3.text && pass3.text.trim().length > 0 && pass3.confidence > confidenceScore) {
+            recognizedText = pass3.text
+            confidenceScore = pass3.confidence
+          }
+        }
+
+        // AŞAMA 4: Geniş Açı / Tam Kare Yedekleme (Kullanıcı kâğıdı kenarda tuttuysa)
+        if (!recognizedText) {
+          setOcrProgress({
+            status: 'recognizing',
+            progress: 85,
+            message: 'Geniş açı ile son tarama yapılıyor...'
+          })
+          const { processedCanvas: fullAdaptiveCanvas } = await preprocessImage(canvas, {
+            crop: { x: 0, y: 0, width: 1, height: 1 },
+            maxDimension: 1800,
+            applyThreshold: true,
+            adaptive: true
+          })
+          const pass4 = await performOcr(fullAdaptiveCanvas, undefined, PSM.SINGLE_BLOCK)
+          if (pass4.text && pass4.text.trim().length > 0) {
+            recognizedText = pass4.text
+            confidenceScore = pass4.confidence
+          }
         }
       }
 

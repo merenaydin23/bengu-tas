@@ -3,8 +3,10 @@
  * %100 yerel varlıklarla (public/tesseract/) çalışır; hiçbir CDN veya dış sunucuya bağlanmaz.
  */
 
-import { createWorker, Worker } from 'tesseract.js'
+import { createWorker, Worker, PSM } from 'tesseract.js'
 import { getAppRootUrl } from '../utils/url'
+
+export { PSM }
 
 export interface OcrProgressUpdate {
   status: string
@@ -31,12 +33,27 @@ let isInitializing = false
 export function cleanOcrText(raw: string): string {
   if (!raw) return ''
 
-  return raw
+  let text = raw
     // Garip özel karakterleri ve OCR kalıntılarını ayıkla
-    .replace(/[~`^_{|}[\]\\<>]/g, '')
-    // Çoklu boşlukları teke indir
+    .replace(/[~`^_{|}[\]\\<>=+*#@$%]/g, '')
+    // Harfler arasındaki tekil noktaları/tireleri kaldır (Ör. T.Ü.R.K -> TÜRK, T-E-N-G-R-I -> TENGRI)
+    .replace(/([A-Za-zÇĞİÖŞÜçğıöşü])[\.\-_/]+(?=[A-Za-zÇĞİÖŞÜçğıöşü])/g, '$1')
+    .replace(/([A-Za-zÇĞİÖŞÜçğıöşü])[\.\-_/]+(?=[A-Za-zÇĞİÖŞÜçğıöşü])/g, '$1')
+
+  // Kelimeler içindeki rakam karışıklıklarını gider (örn. B1LGE -> BİLGE, T0RUN -> TORUN)
+  text = text.split(/\s+/).map(word => {
+    if (/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(word) && /\d/.test(word)) {
+      return word
+        .replace(/1/g, 'İ')
+        .replace(/0/g, 'O')
+        .replace(/5/g, 'S')
+        .replace(/8/g, 'B')
+    }
+    return word
+  }).join(' ')
+
+  return text
     .replace(/[ \t]+/g, ' ')
-    // Çoklu satır başlarını en fazla ikiye indir
     .replace(/\n\s*\n\s*\n/g, '\n\n')
     .trim()
 }
@@ -103,6 +120,13 @@ export async function getOcrWorker(
       }
     })
 
+    // El yazısı ve seyrek metin için en yüksek doğruluk parametreleri
+    await worker.setParameters({
+      tessedit_pageseg_mode: PSM.SINGLE_BLOCK, // SINGLE_BLOCK (Seyrek el yazısı için en stabil mod)
+      tessedit_char_whitelist: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZabcçdefgğhıijklmnoöprsştuüvyz0123456789 ',
+      preserve_interword_spaces: '1'
+    })
+
     cachedWorker = worker
     return worker
   } finally {
@@ -115,9 +139,16 @@ export async function getOcrWorker(
  */
 export async function performOcr(
   imageSource: string | HTMLCanvasElement,
-  onProgress?: (update: OcrProgressUpdate) => void
+  onProgress?: (update: OcrProgressUpdate) => void,
+  psmMode?: PSM
 ): Promise<OcrResult> {
   const worker = await getOcrWorker(onProgress)
+
+  if (psmMode) {
+    await worker.setParameters({
+      tessedit_pageseg_mode: psmMode
+    })
+  }
 
   onProgress?.({
     status: 'recognizing',

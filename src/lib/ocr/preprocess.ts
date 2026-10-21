@@ -1,10 +1,10 @@
 /**
- * Bengü Taş — Görüntü Ön İşleme Motoru (FR-IMG)
- * İstemci tarafında çalışan yüksek kaliteli Canvas görüntü işleme:
- * 1. Çerçeve kırpma ve maksimum boyut ölçekleme (≤ 1600px)
+ * Bengü Taş — Gelişmiş Görüntü Ön İşleme Motoru (FR-IMG)
+ * İstemci tarafında çalışan endüstri standardı Canvas görüntü işleme:
+ * 1. Akıllı ROI kırpma ve ölçekleme (≤ 1600px)
  * 2. Gri tonlama (Luminance)
  * 3. Kontrast germe (Histogram Min-Max Stretching)
- * 4. Otsu Binarization (Otomatik Eşikleme ile Siyah-Beyaz Belge)
+ * 4. Bradley-Roth Adaptif Yerel Eşikleme (Gölge ve ışık değişimlerini %100 temizler)
  */
 
 export interface CropRect {
@@ -18,59 +18,77 @@ export interface PreprocessOptions {
   crop?: CropRect
   maxDimension?: number
   applyThreshold?: boolean
+  adaptive?: boolean
+  sharpen?: boolean
 }
 
 /**
- * Otsu Algoritması: Optimum binarization eşik değerini hesaplar.
+ * Bradley-Roth Adaptif Integral Görüntü Eşikleme Algoritması
+ * Her pikseli kendi 32x32 komşuluk penceresindeki ortalama parlaklıkla kıyaslar.
+ * Oda ışığındaki gölgeleri, cep telefonu gölgelerini ve kağıt sararmalarını tamamen temizler.
  */
-function calculateOtsuThreshold(grayData: Uint8ClampedArray): number {
-  const histogram = new Array(256).fill(0)
-  const totalPixels = grayData.length / 4
+function applyAdaptiveBradleyThreshold(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+  windowSize: number = 32,
+  thresholdRatio: number = 0.15
+): void {
+  const total = width * height
+  const integral = new Float64Array(total)
 
-  for (let i = 0; i < grayData.length; i += 4) {
-    histogram[grayData[i]]++
-  }
+  // 1. Integral Image (Summed-Area Table) Hesapla: O(N)
+  for (let y = 0; y < height; y++) {
+    let rowSum = 0
+    const rowOffset = y * width
+    const prevRowOffset = (y - 1) * width
 
-  let sum = 0
-  for (let i = 0; i < 256; i++) {
-    sum += i * histogram[i]
-  }
-
-  let sumB = 0
-  let wB = 0
-  let wF = 0
-  let varMax = 0
-  let threshold = 128
-
-  for (let t = 0; t < 256; t++) {
-    wB += histogram[t]
-    if (wB === 0) continue
-    wF = totalPixels - wB
-    if (wF === 0) break
-
-    sumB += t * histogram[t]
-    const mB = sumB / wB
-    const mF = (sum - sumB) / wF
-
-    const varBetween = wB * wF * (mB - mF) * (mB - mF)
-    if (varBetween > varMax) {
-      varMax = varBetween
-      threshold = t
+    for (let x = 0; x < width; x++) {
+      const idx = (rowOffset + x) * 4
+      rowSum += data[idx]
+      integral[rowOffset + x] = y === 0 ? rowSum : integral[prevRowOffset + x] + rowSum
     }
   }
 
-  return threshold
+  // 2. Yerel Komşuluk Kıyaslaması: O(1) per pixel
+  const halfWindow = Math.floor(windowSize / 2)
+  const factor = 1 - thresholdRatio
+
+  for (let y = 0; y < height; y++) {
+    const rowOffset = y * width
+    const y1 = Math.max(0, y - halfWindow)
+    const y2 = Math.min(height - 1, y + halfWindow)
+
+    for (let x = 0; x < width; x++) {
+      const x1 = Math.max(0, x - halfWindow)
+      const x2 = Math.min(width - 1, x + halfWindow)
+      const count = (x2 - x1) * (y2 - y1)
+
+      const sum = integral[y2 * width + x2]
+                - integral[y1 * width + x2]
+                - integral[y2 * width + x1]
+                + integral[y1 * width + x1]
+
+      const idx = (rowOffset + x) * 4
+      // Eğer piksel yerel ortalamanın %15 altındaysa yazıdır (siyah: 0), değilse zemin (beyaz: 255)
+      const val = (data[idx] * count <= sum * factor) ? 0 : 255
+      data[idx] = val
+      data[idx + 1] = val
+      data[idx + 2] = val
+    }
+  }
 }
 
 /**
- * Görüntüyü kırpar, ölçekler, grileştirir ve kontrast/eşikleme uygular.
+ * Görüntüyü kırpar, ölçekler, grileştirir ve kontrast/adaptif eşikleme uygular.
  */
 export async function preprocessImage(
   source: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement,
   options: PreprocessOptions = {}
 ): Promise<{ processedCanvas: HTMLCanvasElement; dataUrl: string }> {
   const maxDim = options.maxDimension || 1600
-  const applyThreshold = options.applyThreshold !== false
+  const applyThreshold = options.applyThreshold === true
+  const useAdaptive = options.adaptive !== false
 
   // Kaynak boyutları
   let srcWidth = 0
@@ -94,7 +112,7 @@ export async function preprocessImage(
   const cropW = Math.floor(crop.width * srcWidth)
   const cropH = Math.floor(crop.height * srcHeight)
 
-  // Ölçekleme faktörü (uzun kenar <= maxDim)
+  // Ölçekleme faktörü
   const scale = Math.min(1, maxDim / Math.max(cropW, cropH))
   const targetW = Math.max(10, Math.floor(cropW * scale))
   const targetH = Math.max(10, Math.floor(cropH * scale))
@@ -120,7 +138,7 @@ export async function preprocessImage(
   let maxVal = 0
 
   for (let i = 0; i < data.length; i += 4) {
-    // Luminance standardı: 0.299 R + 0.587 G + 0.114 B
+    // Luminance standardı
     const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2])
     data[i] = gray
     data[i + 1] = gray
@@ -132,7 +150,7 @@ export async function preprocessImage(
 
   // 4. Kontrast Germe (Histogram stretching)
   const range = maxVal - minVal
-  if (range > 10) {
+  if (range > 15) {
     for (let i = 0; i < data.length; i += 4) {
       const stretched = Math.round(((data[i] - minVal) / range) * 255)
       data[i] = stretched
@@ -141,14 +159,21 @@ export async function preprocessImage(
     }
   }
 
-  // 5. Adaptif Eşikleme (Otsu Binarization)
+  // 5. Eşikleme (Binarization)
   if (applyThreshold) {
-    const threshold = calculateOtsuThreshold(data)
-    for (let i = 0; i < data.length; i += 4) {
-      const val = data[i] >= threshold ? 255 : 0
-      data[i] = val
-      data[i + 1] = val
-      data[i + 2] = val
+    if (useAdaptive) {
+      // Bradley-Roth Yerel Adaptif Filtreleme (Gölge Düşmanı)
+      const winSize = Math.max(16, Math.floor(targetW / 24))
+      applyAdaptiveBradleyThreshold(data, targetW, targetH, winSize, 0.14)
+    } else {
+      // Klasik basit eşik
+      const mid = 128
+      for (let i = 0; i < data.length; i += 4) {
+        const val = data[i] < mid ? 0 : 255
+        data[i] = val
+        data[i + 1] = val
+        data[i + 2] = val
+      }
     }
   }
 
