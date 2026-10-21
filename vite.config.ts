@@ -35,8 +35,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm,gz,traineddata}'],
-        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024 // 15MB to allow traineddata & wasm cache
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm,gz,traineddata,onnx,json}'],
+        maximumFileSizeToCacheInBytes: 40 * 1024 * 1024 // 40MB to allow ONNX runtime & traineddata cache
       }
     })
   ],
