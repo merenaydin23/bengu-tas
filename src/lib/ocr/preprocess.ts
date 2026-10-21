@@ -159,7 +159,30 @@ export async function preprocessImage(
     }
   }
 
-  // 5. Eşikleme (Binarization)
+  // 5. Keskinleştirme (Filtreleme ile soluk kalem izlerini belirginleştir)
+  if (options.sharpen !== false) {
+    const copy = new Uint8ClampedArray(data)
+    for (let y = 1; y < targetH - 1; y++) {
+      const row = y * targetW
+      const prevRow = (y - 1) * targetW
+      const nextRow = (y + 1) * targetW
+      for (let x = 1; x < targetW - 1; x++) {
+        const idx = (row + x) * 4
+        const center = copy[idx]
+        const up = copy[(prevRow + x) * 4]
+        const down = copy[(nextRow + x) * 4]
+        const left = copy[(row + x - 1) * 4]
+        const right = copy[(row + x + 1) * 4]
+
+        const sharp = Math.max(0, Math.min(255, 5 * center - up - down - left - right))
+        data[idx] = sharp
+        data[idx + 1] = sharp
+        data[idx + 2] = sharp
+      }
+    }
+  }
+
+  // 6. Eşikleme (Binarization)
   if (applyThreshold) {
     if (useAdaptive) {
       // Bradley-Roth Yerel Adaptif Filtreleme (Gölge Düşmanı)

@@ -254,45 +254,102 @@ export const Translate: React.FC = () => {
         </div>
       </div>
 
-      {/* Kamera Alanı */}
-      {activeTab === 'camera' && (
-        <CameraCapture
-          onCapture={handleCapture}
-          disabled={isProcessing}
-        />
-      )}
+      {/* 3 Aşamalı Akış Kartları */}
+      <div className="space-y-6">
 
-      {/* Sade Düzenleme Kutusu */}
-      <OcrPanel
-        inputText={inputText}
-        onTextChange={setInputText}
-        ocrProgress={ocrProgress}
-        ocrResult={ocrResult}
-        isProcessing={isProcessing}
-        onReset={handleReset}
-      />
+        {/* 1. AŞAMA: KAMERA / YAZI GİRİŞİ */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-gold text-sky-dark text-xs font-black flex items-center justify-center shadow-md">
+                1
+              </span>
+              <h2 className="text-xs sm:text-sm font-bold text-stone-sand uppercase tracking-wider">
+                {activeTab === 'camera' ? 'Kamera ile El Yazını Çek' : 'Türkçe Metni Yaz'}
+              </h2>
+            </div>
+            {isProcessing && (
+              <span className="text-xs text-gold font-medium animate-pulse flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>İşleniyor...</span>
+              </span>
+            )}
+          </div>
 
-      {/* Büyüleyici Göktürk Yazıt Çıktısı (Odak Noktası) */}
-      <GokturkOutput
-        conversion={conversion}
-        latinText={inputText}
-        mode={mode}
-        direction={direction}
-        separator={separator}
-        onModeChange={setMode}
-        onDirectionChange={setDirection}
-        onSeparatorChange={setSeparator}
-      />
+          {activeTab === 'camera' && (
+            <CameraCapture
+              onCapture={handleCapture}
+              disabled={isProcessing}
+            />
+          )}
+        </section>
 
-      {/* Şeffaf Çözümleme ve Harf Harf Ses Kuralları Paneli */}
-      <TransparencyPanel
-        inputText={inputText}
-        mode={mode}
-        ocrResult={ocrResult}
-        capturedImage={capturedImage}
-        engineName={engineUsedName}
-        processingTimeMs={processingTimeMs}
-      />
+        {/* 2. AŞAMA: OKUNAN TÜRKÇE METİN (AÇIK & ŞEFFAF) */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-gold/90 text-sky-dark text-xs font-black flex items-center justify-center shadow-md">
+                2
+              </span>
+              <h2 className="text-xs sm:text-sm font-bold text-stone-sand uppercase tracking-wider">
+                Okunan Metin (1. Olarak Çıkarılan Yazı)
+              </h2>
+            </div>
+            {ocrResult && (
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-950/70 text-emerald-300 border border-emerald-500/40 font-semibold">
+                %{ocrResult.confidence} Doğruluk
+              </span>
+            )}
+          </div>
+
+          <OcrPanel
+            inputText={inputText}
+            onTextChange={setInputText}
+            ocrProgress={ocrProgress}
+            ocrResult={ocrResult}
+            isProcessing={isProcessing}
+            onReset={handleReset}
+          />
+        </section>
+
+        {/* 3. AŞAMA: GÖKTÜRKÇE ANIT YAZITI */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-gold to-gold-light text-sky-dark text-xs font-black flex items-center justify-center shadow-md">
+                3
+              </span>
+              <h2 className="text-xs sm:text-sm font-bold text-stone-sand uppercase tracking-wider">
+                Göktürkçe (Orhun) Bengü Taş Yazıtı
+              </h2>
+            </div>
+          </div>
+
+          <GokturkOutput
+            conversion={conversion}
+            latinText={inputText}
+            mode={mode}
+            direction={direction}
+            separator={separator}
+            onModeChange={setMode}
+            onDirectionChange={setDirection}
+            onSeparatorChange={setSeparator}
+          />
+        </section>
+
+        {/* 4. AŞAMA: ŞEFFAF HARF HARF SES KURALLARI */}
+        <section className="pt-2">
+          <TransparencyPanel
+            inputText={inputText}
+            mode={mode}
+            ocrResult={ocrResult}
+            capturedImage={capturedImage}
+            engineName={engineUsedName}
+            processingTimeMs={processingTimeMs}
+          />
+        </section>
+
+      </div>
 
     </div>
   )
