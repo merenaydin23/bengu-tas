@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react'
 import { Camera, RefreshCw, Upload, AlertCircle, Info, Sparkles } from 'lucide-react'
 
 export interface CameraCaptureProps {
-  onCapture: (capturedCanvas: HTMLCanvasElement) => void
+  onCapture: (capturedCanvas: HTMLCanvasElement, previewDataUrl?: string) => void
   onError?: (err: Error) => void
   disabled?: boolean
 }
@@ -124,7 +124,8 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
     if (ctx) {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-      onCapture(canvas)
+      const previewDataUrl = canvas.toDataURL('image/jpeg', 0.85)
+      onCapture(canvas, previewDataUrl)
     }
   }
 
@@ -143,7 +144,8 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         const ctx = canvas.getContext('2d')
         if (ctx) {
           ctx.drawImage(img, 0, 0)
-          onCapture(canvas)
+          const previewDataUrl = canvas.toDataURL('image/jpeg', 0.85)
+          onCapture(canvas, previewDataUrl)
         }
       }
       img.src = event.target?.result as string
@@ -174,7 +176,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
             <p className="text-sm text-stone-sand leading-relaxed">{cameraError}</p>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gold text-sky-dark font-bold hover:bg-gold-light transition-all shadow-lg active:scale-95"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gold text-sky-dark font-bold hover:bg-gold-light transition-all shadow-lg active:scale-95 min-h-[44px]"
             >
               <Upload className="w-5 h-5" />
               <span>Fotoğraf Yükle</span>
@@ -190,25 +192,25 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
               className="w-full h-full object-cover"
             />
 
-            {/* Hizalama Çerçevesi (Kılavuz) */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 sm:p-12">
-              <div className="relative w-full max-w-lg aspect-[3/1] border-2 border-dashed border-gold/80 rounded-2xl shadow-[0_0_0_9999px_rgba(14,27,43,0.55)] flex items-center justify-center">
+            {/* Geniş ve Rahat Hizalama Çerçevesi */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-4 sm:p-8">
+              <div className="relative w-[92%] max-w-lg aspect-[5/2] sm:aspect-[3/1] border-2 border-dashed border-gold/75 rounded-2xl flex items-center justify-center bg-sky-dark/20 backdrop-brightness-105">
                 {/* Köşe Süsleri */}
                 <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-gold rounded-tl-lg" />
                 <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-gold rounded-tr-lg" />
                 <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-gold rounded-bl-lg" />
                 <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-gold rounded-br-lg" />
 
-                <span className="text-xs sm:text-sm font-medium text-stone-sand bg-sky-dark/80 px-3 py-1 rounded-full border border-gold/40 shadow-sm backdrop-blur-sm">
-                  Yazıyı bu çerçevenin içine hizala
+                <span className="text-[11px] sm:text-xs font-semibold text-stone-sand bg-sky-dark/90 px-3 py-1 rounded-full border border-gold/40 shadow-sm backdrop-blur-sm">
+                  Yazıyı buraya tutunuz
                 </span>
               </div>
             </div>
 
-            {/* Kamera Değiştir Butonu */}
+            {/* Kamera Değiştir Butonu (Mobil için büyük dokunma alanı) */}
             <button
               onClick={toggleFacingMode}
-              className="absolute top-4 right-4 p-3 rounded-full bg-sky-dark/70 hover:bg-sky-dark text-gold border border-gold/30 backdrop-blur-md transition-all active:scale-95"
+              className="absolute top-3 right-3 p-3 rounded-full bg-sky-dark/80 hover:bg-sky-dark text-gold border border-gold/40 backdrop-blur-md transition-all active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center shadow-lg"
               title="Kamerayı Değiştir (Ön / Arka)"
               aria-label="Kamera Değiştir"
             >
@@ -218,38 +220,39 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         )}
       </div>
 
-      {/* İpucu ve Alt Buton Çubuğu */}
-      <div className="p-4 sm:p-6 bg-gradient-to-t from-sky-dark to-sky-navy border-t border-gold/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Dokunmatik Dostu Mobil Alt Kumanda Çubuğu */}
+      <div className="p-3 sm:p-5 bg-gradient-to-t from-sky-dark to-sky-navy border-t border-gold/20 flex flex-col sm:flex-row items-center justify-between gap-3">
         
-        {/* İpucu Kutusu (FR-OCR) */}
-        <div className="flex items-start gap-2.5 text-xs text-stone-medium max-w-md">
+        {/* İpucu Kutusu */}
+        <div className="flex items-start gap-2 text-xs text-stone-medium max-w-md w-full sm:w-auto">
           <Info className="w-4 h-4 text-gold shrink-0 mt-0.5" />
           <span>
-            <strong className="text-stone-sand">İpucu:</strong> Koyu renkli kalemle, beyaz kâğıda,{' '}
-            <strong className="text-gold">BÜYÜK HARFLERLE</strong> ve aralıklı yazarsan en doğru sonucu alırsın.
+            Koyu kalemle, beyaz kâğıda <strong className="text-gold">BÜYÜK HARFLERLE</strong> yazınız.
           </span>
         </div>
 
-        {/* Eylem Butonları */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+        {/* Eylem Butonları: Mobilde ortalanmış deklanşör */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+          {/* Fotoğraf Yükle Butonu */}
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-sky-navy hover:bg-sky-deep text-stone-sand border border-gold/30 text-sm font-semibold transition-all active:scale-95 min-h-[44px]"
-            title="Galeriden veya Dosyalardan Seç"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-sky-navy hover:bg-sky-deep text-stone-sand border border-gold/30 text-xs sm:text-sm font-semibold transition-all active:scale-95 min-h-[48px]"
+            title="Galeriden Fotoğraf Seç"
           >
             <Upload className="w-4 h-4 text-gold" />
             <span>Yükle</span>
           </button>
 
+          {/* Ana Deklanşör Butonu (Yazıyı Oku) */}
           {!cameraError && (
             <button
               onClick={handleCapture}
               disabled={disabled || isLoading}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-gold via-gold-light to-gold text-sky-dark text-sm font-bold shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all active:scale-95 disabled:opacity-50 min-h-[44px]"
+              className="flex-2 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-gold via-gold-light to-gold text-sky-dark text-sm sm:text-base font-bold shadow-lg shadow-gold/30 hover:shadow-gold/50 transition-all active:scale-95 disabled:opacity-50 min-h-[48px]"
             >
-              <Camera className="w-5 h-5" />
+              <Camera className="w-5 h-5 text-sky-dark" />
               <span>Yazıyı Oku</span>
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-sky-dark animate-pulse" />
             </button>
           )}
         </div>

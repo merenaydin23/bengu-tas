@@ -37,19 +37,19 @@ export const Navbar: React.FC = () => {
   return (
     <nav className="sticky top-0 z-50 bg-sky-dark/95 backdrop-blur-md border-b border-gold/20 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           
           {/* Logo ve Başlık */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-gold rounded-lg p-1">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gold/30 via-crimson/30 to-sky-deep flex items-center justify-center border border-gold/50 group-hover:scale-105 transition-transform">
-              <span className="font-gokturk text-2xl text-gold rune-glow">𐱅𐰇𐰼𐰜</span>
+          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none focus:ring-2 focus:ring-gold rounded-lg p-1">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-gold/30 via-crimson/30 to-sky-deep flex items-center justify-center border border-gold/50 group-hover:scale-105 transition-transform">
+              <span className="font-gokturk text-xl sm:text-2xl text-gold rune-glow">𐱅𐰇𐰼𐰜</span>
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-serif text-2xl font-bold tracking-wider text-stone-sand group-hover:text-gold transition-colors">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-serif text-lg sm:text-2xl font-bold tracking-wider text-stone-sand group-hover:text-gold transition-colors">
                   BENGÜ TAŞ
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-crimson/30 text-gold border border-crimson/60 font-semibold tracking-wide">
+                <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full bg-crimson/30 text-gold border border-crimson/60 font-semibold tracking-wide">
                   v1.0
                 </span>
               </div>

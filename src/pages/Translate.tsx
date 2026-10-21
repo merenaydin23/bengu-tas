@@ -2,11 +2,12 @@ import React, { useState, useCallback } from 'react'
 import { CameraCapture } from '../components/camera/CameraCapture'
 import { OcrPanel } from '../components/translator/OcrPanel'
 import { GokturkOutput } from '../components/translator/GokturkOutput'
+import { TransparencyPanel } from '../components/translator/TransparencyPanel'
 import { preprocessImage } from '../lib/ocr/preprocess'
 import { performOcr, OcrProgressUpdate, OcrResult } from '../lib/ocr/tesseract-client'
 import { runBenguNetOcr } from '../lib/ocr/bengunet-client'
 import { convertToGokturk, ConversionMode, WritingDirection, SeparatorStyle } from '../lib/gokturk/convert'
-import { Camera, Keyboard, Sparkles } from 'lucide-react'
+import { Camera, Keyboard, Sparkles, Cpu } from 'lucide-react'
 
 export const Translate: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'camera' | 'text'>('camera')
@@ -15,6 +16,9 @@ export const Translate: React.FC = () => {
   const [ocrProgress, setOcrProgress] = useState<OcrProgressUpdate | null>(null)
   const [ocrResult, setOcrResult] = useState<OcrResult | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [capturedImage, setCapturedImage] = useState<string | null>(null)
+  const [processingTimeMs, setProcessingTimeMs] = useState<number | undefined>(undefined)
+  const [engineUsedName, setEngineUsedName] = useState<string>('Tesseract v5.1 (Türkçe Sözlük)')
 
   // Çeviri Ayarları
   const [mode, setMode] = useState<ConversionMode>('student')
@@ -29,8 +33,11 @@ export const Translate: React.FC = () => {
   })
 
   // Kameradan / Dosyadan Görüntü Alındığında
-  const handleCapture = useCallback(async (canvas: HTMLCanvasElement) => {
+  const handleCapture = useCallback(async (canvas: HTMLCanvasElement, previewDataUrl?: string) => {
+    const startTime = performance.now()
     setIsProcessing(true)
+    setCapturedImage(previewDataUrl || canvas.toDataURL('image/jpeg', 0.85))
+
     setOcrProgress({
       status: 'processing',
       progress: 20,
@@ -47,9 +54,11 @@ export const Translate: React.FC = () => {
 
       let recognizedText = ''
       let confidenceScore = 0
+      let activeEngine = 'Tesseract v5.1 (Türkçe Sözlük)'
 
       // BengüNet AI seçildiyse önce BengüNet dene
       if (engineType === 'bengunet') {
+        activeEngine = 'BengüNet AI (Özel PyTorch CNN)'
         setOcrProgress({
           status: 'recognizing',
           progress: 50,
@@ -68,6 +77,7 @@ export const Translate: React.FC = () => {
 
       // Tesseract ile ana veya yedek okuma
       if (!recognizedText || engineType === 'tesseract') {
+        activeEngine = 'Tesseract v5.1 (Türkçe Sözlük)'
         setOcrProgress({
           status: 'recognizing',
           progress: 60,
@@ -110,6 +120,10 @@ export const Translate: React.FC = () => {
         }
       }
 
+      const duration = Math.round(performance.now() - startTime)
+      setProcessingTimeMs(duration)
+      setEngineUsedName(activeEngine)
+
       if (recognizedText) {
         setInputText(recognizedText)
         setOcrResult({
@@ -146,18 +160,20 @@ export const Translate: React.FC = () => {
     setInputText('')
     setOcrResult(null)
     setOcrProgress(null)
+    setCapturedImage(null)
+    setProcessingTimeMs(undefined)
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 animate-fade-in">
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6 animate-fade-in">
       
-      {/* Sade & Şık Üst Çubuk */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Sade & Şık Üst Çubuk (Mobilde ve Masaüstünde Mükemmel Uyum) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Giriş Sekmeleri */}
-        <div className="inline-flex p-1 rounded-2xl bg-sky-navy/80 border border-gold/30 shadow-md">
+        <div className="inline-flex p-1 rounded-2xl bg-sky-navy/90 border border-gold/30 shadow-md justify-center">
           <button
             onClick={() => setActiveTab('camera')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
               activeTab === 'camera'
                 ? 'bg-gold text-sky-dark shadow-md font-bold'
                 : 'text-stone-medium hover:text-stone-sand'
@@ -169,7 +185,7 @@ export const Translate: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('text')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
               activeTab === 'text'
                 ? 'bg-gold text-sky-dark shadow-md font-bold'
                 : 'text-stone-medium hover:text-stone-sand'
@@ -181,28 +197,29 @@ export const Translate: React.FC = () => {
         </div>
 
         {/* Minimalist Model Seçici */}
-        <div className="inline-flex items-center p-1 rounded-xl bg-sky-navy/60 border border-gold/20 text-xs">
+        <div className="inline-flex items-center p-1 rounded-xl bg-sky-navy/70 border border-gold/25 text-xs justify-center">
+          <button
+            onClick={() => setEngineType('tesseract')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg transition-all min-h-[40px] ${
+              engineType === 'tesseract'
+                ? 'bg-gold/25 text-gold font-bold border border-gold/50 shadow-sm'
+                : 'text-stone-medium hover:text-stone-sand'
+            }`}
+          >
+            <Cpu className="w-3.5 h-3.5 text-gold" />
+            <span>Tesseract (Sözlük)</span>
+          </button>
+
           <button
             onClick={() => setEngineType('bengunet')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg transition-all min-h-[40px] ${
               engineType === 'bengunet'
-                ? 'bg-gold/20 text-gold font-bold border border-gold/40'
+                ? 'bg-gold/25 text-gold font-bold border border-gold/50 shadow-sm'
                 : 'text-stone-medium hover:text-stone-sand'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-gold" />
             <span>BengüNet AI</span>
-          </button>
-
-          <button
-            onClick={() => setEngineType('tesseract')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              engineType === 'tesseract'
-                ? 'bg-gold/20 text-gold font-bold border border-gold/40'
-                : 'text-stone-medium hover:text-stone-sand'
-            }`}
-          >
-            <span>Klasik OCR</span>
           </button>
         </div>
       </div>
@@ -225,7 +242,7 @@ export const Translate: React.FC = () => {
         onReset={handleReset}
       />
 
-      {/* Büyüleyici Göktürk Yazıt Çıktısı */}
+      {/* Büyüleyici Göktürk Yazıt Çıktısı (Odak Noktası) */}
       <GokturkOutput
         conversion={conversion}
         latinText={inputText}
@@ -235,6 +252,16 @@ export const Translate: React.FC = () => {
         onModeChange={setMode}
         onDirectionChange={setDirection}
         onSeparatorChange={setSeparator}
+      />
+
+      {/* Şeffaf Çözümleme ve Harf Harf Ses Kuralları Paneli */}
+      <TransparencyPanel
+        inputText={inputText}
+        mode={mode}
+        ocrResult={ocrResult}
+        capturedImage={capturedImage}
+        engineName={engineUsedName}
+        processingTimeMs={processingTimeMs}
       />
 
     </div>
