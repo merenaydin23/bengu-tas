@@ -10,7 +10,7 @@ import { Camera, Keyboard, Sparkles } from 'lucide-react'
 
 export const Translate: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'camera' | 'text'>('camera')
-  const [engineType, setEngineType] = useState<'bengunet' | 'tesseract'>('bengunet')
+  const [engineType, setEngineType] = useState<'bengunet' | 'tesseract'>('tesseract')
   const [inputText, setInputText] = useState('')
   const [ocrProgress, setOcrProgress] = useState<OcrProgressUpdate | null>(null)
   const [ocrResult, setOcrResult] = useState<OcrResult | null>(null)
@@ -33,47 +33,109 @@ export const Translate: React.FC = () => {
     setIsProcessing(true)
     setOcrProgress({
       status: 'processing',
-      progress: 30,
-      message: 'Yazı taranıyor...'
+      progress: 20,
+      message: 'Görüntü taranıyor ve optimize ediliyor...'
     })
 
     try {
+      // 1. Görüntüyü ölçekle ve kontrastı artır
       const { processedCanvas } = await preprocessImage(canvas, {
-        crop: { x: 0.1, y: 0.25, width: 0.8, height: 0.5 },
-        maxDimension: 1600,
-        applyThreshold: true
+        crop: { x: 0.01, y: 0.02, width: 0.98, height: 0.96 },
+        maxDimension: 1800,
+        applyThreshold: false
       })
 
+      let recognizedText = ''
+      let confidenceScore = 0
+
+      // BengüNet AI seçildiyse önce BengüNet dene
       if (engineType === 'bengunet') {
         setOcrProgress({
           status: 'recognizing',
-          progress: 70,
-          message: 'Yapay zekâ harfleri çözümlüyor...'
+          progress: 50,
+          message: 'BengüNet yapay zekâsı harfleri çözümlüyor...'
         })
+        try {
+          const pred = await runBenguNetOcr(processedCanvas)
+          if (pred.text && pred.text.trim().length > 0) {
+            recognizedText = pred.text
+            confidenceScore = pred.confidence
+          }
+        } catch (netErr) {
+          console.warn('BengüNet hatası, Tesseract yedeğine geçiliyor:', netErr)
+        }
+      }
 
-        const pred = await runBenguNetOcr(processedCanvas)
-
-        setInputText(pred.text)
-        setOcrResult({
-          text: pred.text,
-          confidence: pred.confidence,
-          lowConfidence: pred.confidence < 50,
-          words: pred.text.split(' ').map(w => ({ text: w, confidence: pred.confidence }))
+      // Tesseract ile ana veya yedek okuma
+      if (!recognizedText || engineType === 'tesseract') {
+        setOcrProgress({
+          status: 'recognizing',
+          progress: 60,
+          message: 'Türkçe yazı taranıyor ve okunuyor...'
         })
-      } else {
-        const result = await performOcr(processedCanvas, (update) => {
+        const tessResult = await performOcr(processedCanvas, (update) => {
           setOcrProgress(update)
         })
+        if (tessResult.text && tessResult.text.trim().length > 0) {
+          recognizedText = tessResult.text
+          confidenceScore = tessResult.confidence
+        }
+      }
 
-        setOcrResult(result)
-        setInputText(result.text || '')
+      // 2. Geçiş: Ham görüntü ile Leptonica adaptif okuma dene
+      if (!recognizedText) {
+        setOcrProgress({
+          status: 'recognizing',
+          progress: 80,
+          message: 'Gelişmiş adaptif filtreleme ile tekrar okunuyor...'
+        })
+        const rawResult = await performOcr(canvas)
+        if (rawResult.text && rawResult.text.trim().length > 0) {
+          recognizedText = rawResult.text
+          confidenceScore = rawResult.confidence
+        }
+      }
+
+      // 3. Geçiş: Yüksek kontrastlı Otsu binarize görüntü ile son şans dene
+      if (!recognizedText) {
+        const { processedCanvas: binarizedCanvas } = await preprocessImage(canvas, {
+          crop: { x: 0.01, y: 0.02, width: 0.98, height: 0.96 },
+          maxDimension: 1800,
+          applyThreshold: true
+        })
+        const retryResult = await performOcr(binarizedCanvas)
+        if (retryResult.text && retryResult.text.trim().length > 0) {
+          recognizedText = retryResult.text
+          confidenceScore = retryResult.confidence
+        }
+      }
+
+      if (recognizedText) {
+        setInputText(recognizedText)
+        setOcrResult({
+          text: recognizedText,
+          confidence: confidenceScore,
+          lowConfidence: confidenceScore < 50,
+          words: recognizedText.split(' ').map(w => ({ text: w, confidence: confidenceScore }))
+        })
+        setOcrProgress({
+          status: 'done',
+          progress: 100,
+          message: 'Yazı başarıyla okundu!'
+        })
+      } else {
+        setOcrProgress({
+          status: 'done',
+          progress: 100,
+          message: 'Yazı okunamadı. Lütfen kâğıdı yaklaştır ve büyük harflerle tekrar dene.'
+        })
       }
     } catch (err) {
       console.error('OCR Hatası:', err)
       setOcrProgress({
         status: 'error',
         progress: 0,
-        message: 'Okunamadı, lütfen tekrar dene veya yazarak gir.'
+        message: 'Kamera görüntüsü işlenemedi. Lütfen kâğıdı iyi aydınlatılmış bir yerde tutunuz.'
       })
     } finally {
       setIsProcessing(false)

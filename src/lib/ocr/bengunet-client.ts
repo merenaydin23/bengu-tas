@@ -4,6 +4,7 @@
  */
 
 import * as ort from 'onnxruntime-web'
+import { getAppRootUrl } from '../utils/url'
 
 export interface CharacterBox {
   x: number
@@ -35,11 +36,13 @@ let cachedSession: ort.InferenceSession | null = null
 export async function getBenguNetSession(): Promise<ort.InferenceSession> {
   if (cachedSession) return cachedSession
 
-  const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '')
-  const modelUrl = `${baseUrl}/model/bengu_net.onnx`
+  // Her barındırma ortamında (GitHub Pages alt klasörü, Vercel, localhost) hatasız mutlak yol
+  const rootUrl = getAppRootUrl()
+
+  const modelUrl = `${rootUrl}model/bengu_net.onnx`
 
   // Yerel WASM motoru (CDN bağımlılığı yok)
-  ort.env.wasm.wasmPaths = `${baseUrl}/ort/`
+  ort.env.wasm.wasmPaths = `${rootUrl}ort/`
   ort.env.wasm.numThreads = 1
 
   // WebAssembly tabanlı yüksek performanslı yürütme
@@ -63,14 +66,23 @@ export function segmentCharacters(canvas: HTMLCanvasElement): CharacterBox[] {
   const imgData = ctx.getImageData(0, 0, width, height)
   const data = imgData.data
 
+  // Adaptif mürekkep eşiği (Işık değişimlerini telafi eder)
+  let sumL = 0
+  let sampleCount = 0
+  for (let i = 0; i < data.length; i += 16) {
+    sumL += data[i]
+    sampleCount++
+  }
+  const avgBrightness = sampleCount > 0 ? sumL / sampleCount : 128
+  // Yazı pikselleri ortalama parlaklığın %70'inden daha koyu olmalıdır
+  const inkThreshold = Math.min(140, Math.max(60, Math.floor(avgBrightness * 0.72)))
+
   // 1. Dikey Projeksiyon Profili (Vertical Projection Profile)
-  // Her x sütunundaki siyah (yazı) piksel sayısını hesapla
   const verticalProjection = new Array(width).fill(0)
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       const idx = (y * width + x) * 4
-      // Siyah piksel mi? (R < 128)
-      if (data[idx] < 128) {
+      if (data[idx] < inkThreshold) {
         verticalProjection[x]++
       }
     }
@@ -80,7 +92,7 @@ export function segmentCharacters(canvas: HTMLCanvasElement): CharacterBox[] {
   const segments: { startX: number; endX: number }[] = []
   let inChar = false
   let startX = 0
-  const noiseThreshold = Math.max(2, Math.floor(height * 0.02))
+  const noiseThreshold = Math.max(2, Math.floor(height * 0.015))
 
   for (let x = 0; x < width; x++) {
     if (verticalProjection[x] > noiseThreshold) {
@@ -91,15 +103,20 @@ export function segmentCharacters(canvas: HTMLCanvasElement): CharacterBox[] {
     } else {
       if (inChar) {
         inChar = false
-        if (x - startX >= 4) { // En az 4 piksel genişlik
+        const segWidth = x - startX
+        // Çok geniş (tüm sayfa/kenarlık) veya çok dar (gürültü) alanları filtrele
+        if (segWidth >= 4 && segWidth < width * 0.5) {
           segments.push({ startX, endX: x })
         }
       }
     }
   }
 
-  if (inChar && width - startX >= 4) {
-    segments.push({ startX, endX: width })
+  if (inChar) {
+    const segWidth = width - startX
+    if (segWidth >= 4 && segWidth < width * 0.5) {
+      segments.push({ startX, endX: width })
+    }
   }
 
   // 3. Her segment için dikey (y) sınırları bul ve 32x32 tensör üret

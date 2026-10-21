@@ -4,6 +4,7 @@
  */
 
 import { createWorker, Worker } from 'tesseract.js'
+import { getAppRootUrl } from '../utils/url'
 
 export interface OcrProgressUpdate {
   status: string
@@ -67,11 +68,12 @@ export async function getOcrWorker(
       message: 'Okuma motoru ve Türkçe dil paketi hazırlanıyor...'
     })
 
-    // Vite base URL ile göreli yerel yollar
-    const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '')
-    const workerPath = `${baseUrl}/tesseract/worker.min.js`
-    const corePath = `${baseUrl}/tesseract`
-    const langPath = `${baseUrl}/tesseract`
+    // Her barındırma ortamında (GitHub Pages alt klasörü, Vercel, localhost) hatasız mutlak yol
+    const rootUrl = getAppRootUrl()
+
+    const workerPath = `${rootUrl}tesseract/worker.min.js`
+    const corePath = `${rootUrl}tesseract`
+    const langPath = `${rootUrl}tesseract`
 
     const worker = await createWorker('tur', 1, {
       workerPath,
