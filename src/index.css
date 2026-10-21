@@ -1,0 +1,111 @@
+@import "@fontsource/cinzel/600.css";
+@import "@fontsource/cinzel/700.css";
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+
+/* Self-hosted Noto Sans Old Turkic (@font-face) */
+@font-face {
+  font-family: 'Noto Sans Old Turkic';
+  src: url('/fonts/NotoSansOldTurkic.woff2') format('woff2'),
+       url('/fonts/NotoSansOldTurkic.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0E1B2B;
+  --bg-surface: #15263B;
+  --bg-surface-elevated: #1B314B;
+  --color-sky-blue: #4A90C2;
+  --color-gold: #D4A017;
+  --color-gold-light: #F5B041;
+  --color-crimson: #9E1B1B;
+  --color-sand: #F3E9D2;
+  --text-muted: #8C929D;
+}
+
+.light {
+  --bg-primary: #F7F5F0;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #EDE8DE;
+  --color-sky-blue: #1F4E79;
+  --color-gold: #A67C12;
+  --color-gold-light: #D4A017;
+  --color-crimson: #9E1B1B;
+  --color-sand: #1B2B3A;
+  --text-muted: #596573;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--color-sand);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Göktürk Yazıt Taşı Dokusu */
+.stone-texture {
+  background-image: 
+    radial-gradient(ellipse at 50% 0%, rgba(74, 144, 194, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-primary) 100%);
+  border: 1px solid rgba(212, 160, 23, 0.25);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.stone-border-gold {
+  border: 2px solid #D4A017;
+  box-shadow: 0 0 15px rgba(212, 160, 23, 0.15);
+}
+
+.stone-border-crimson {
+  border: 2px solid #9E1B1B;
+}
+
+/* Göktürk Harf Akışı Animasyonu */
+@keyframes runeShimmer {
+  0% { color: #F5B041; text-shadow: 0 0 8px rgba(245, 176, 65, 0.6); }
+  50% { color: #D4A017; text-shadow: 0 0 2px rgba(212, 160, 23, 0.3); }
+  100% { color: #F5B041; text-shadow: 0 0 8px rgba(245, 176, 65, 0.6); }
+}
+
+.rune-glow {
+  animation: runeShimmer 3s infinite ease-in-out;
+}
+
+/* Saygı: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbar özelleştirme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0E1B2B;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F4E79;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4A017;
+}

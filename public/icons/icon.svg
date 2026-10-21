@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Dark Steppe Night Background -->
+  <rect width="512" height="512" rx="64" fill="#0E1B2B" />
+  
+  <!-- Outer Gold Border -->
+  <circle cx="256" cy="256" r="220" stroke="#D4A017" stroke-width="8" opacity="0.85" />
+  <circle cx="256" cy="256" r="200" stroke="#4A90C2" stroke-width="3" opacity="0.5" stroke-dasharray="8 8" />
+
+  <!-- Monolith / Bengü Taş Body -->
+  <path d="M170 410 L170 170 C170 120 342 120 342 170 L342 410 Z" fill="#15263B" stroke="#D4A017" stroke-width="6" />
+  
+  <!-- Pedestal / Base -->
+  <rect x="136" y="410" width="240" height="32" rx="4" fill="#9E1B1B" stroke="#D4A017" stroke-width="4" />
+  
+  <!-- Sun / Tamga Symbol -->
+  <circle cx="256" cy="180" r="32" fill="#D4A017" />
+  <circle cx="256" cy="180" r="18" fill="#0E1B2B" />
+  <circle cx="256" cy="180" r="8" fill="#F5B041" />
+  
+  <!-- Stylized Orkhon Runes on Stone -->
+  <!-- Rune 1: Tengri / Sky symbol (T) 0x10C45 / 0x10C43 -->
+  <path d="M226 240 L286 240 M256 240 L256 270 M236 270 L276 270" stroke="#4A90C2" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Rune 2: Türk / R rune 0x10C3C -->
+  <path d="M236 300 L276 300 M256 300 L276 330 M236 330 L276 330" stroke="#4A90C2" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Rune 3: Arrow / Tamga -->
+  <path d="M240 370 L256 350 L272 370 M256 350 L256 385" stroke="#D4A017" stroke-width="5" stroke-linecap="round" />
+</svg>

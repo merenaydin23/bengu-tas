@@ -1,0 +1,352 @@
+[
+  {
+    "char": "𐰀",
+    "code": "U+10C00",
+    "name": "ORKHON A",
+    "latin": "a / e",
+    "type": "vowel",
+    "harmony": "neutral",
+    "tip": "Kalın hecede 'a', ince hecede 'e' sesini verir.",
+    "sample": "At (at), El (el)"
+  },
+  {
+    "char": "𐰃",
+    "code": "U+10C03",
+    "name": "ORKHON I",
+    "latin": "ı / i",
+    "type": "vowel",
+    "harmony": "neutral",
+    "tip": "Kalın hecede 'ı', ince hecede 'i' sesini verir.",
+    "sample": "İl (il), Ilgar (ılgar)"
+  },
+  {
+    "char": "𐰆",
+    "code": "U+10C06",
+    "name": "ORKHON O",
+    "latin": "o / u",
+    "type": "vowel",
+    "harmony": "back",
+    "tip": "Kalın ünlüler o ve u sesini verir.",
+    "sample": "Oguz (Oğuz), Ulus (ulus)"
+  },
+  {
+    "char": "𐰇",
+    "code": "U+10C07",
+    "name": "ORKHON OE",
+    "latin": "ö / ü",
+    "type": "vowel",
+    "harmony": "front",
+    "tip": "İnce ünlüler ö ve ü sesini verir.",
+    "sample": "Ötüken, Türk"
+  },
+  {
+    "char": "𐰉",
+    "code": "U+10C09",
+    "name": "ORKHON AB",
+    "latin": "b (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "a, ı, o, u ile birlikte kullanılır.",
+    "sample": "Balık (şehir)"
+  },
+  {
+    "char": "𐰋",
+    "code": "U+10C0B",
+    "name": "ORKHON AEB",
+    "latin": "b (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "e, i, ö, ü ile birlikte kullanılır.",
+    "sample": "Bilge, Bengü"
+  },
+  {
+    "char": "𐰍",
+    "code": "U+10C0D",
+    "name": "ORKHON AG",
+    "latin": "g / ğ (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Gırtlaksı kalın g/ğ sesi.",
+    "sample": "Kağan"
+  },
+  {
+    "char": "𐰏",
+    "code": "U+10C0F",
+    "name": "ORKHON AEG",
+    "latin": "g / ğ (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "Ön damaksıl ince g/ğ sesi.",
+    "sample": "Tengri, Beg"
+  },
+  {
+    "char": "𐰑",
+    "code": "U+10C11",
+    "name": "ORKHON AD",
+    "latin": "d (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Kalın hecelerde d sesi.",
+    "sample": "Bodun (millet)"
+  },
+  {
+    "char": "𐰓",
+    "code": "U+10C13",
+    "name": "ORKHON AED",
+    "latin": "d (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerde d sesi.",
+    "sample": "Edgü (iyi)"
+  },
+  {
+    "char": "𐰴",
+    "code": "U+10C34",
+    "name": "ORKHON AQ",
+    "latin": "k / q (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Gırtlaksı tok k/q sesi.",
+    "sample": "Kağan, Kut"
+  },
+  {
+    "char": "𐰚",
+    "code": "U+10C1A",
+    "name": "ORKHON AEK",
+    "latin": "k (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerdeki k sesi.",
+    "sample": "Kül Tigin"
+  },
+  {
+    "char": "𐰜",
+    "code": "U+10C1C",
+    "name": "ORKHON OEK",
+    "latin": "k (ö/ü yanı)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "Ö ve ü ünlüleriyle birlikte kullanılan k.",
+    "sample": "Türk, Kök"
+  },
+  {
+    "char": "𐰞",
+    "code": "U+10C1E",
+    "name": "ORKHON AL",
+    "latin": "l (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Kalın hecelerdeki l sesi.",
+    "sample": "Alp, Yol"
+  },
+  {
+    "char": "𐰠",
+    "code": "U+10C20",
+    "name": "ORKHON AEL",
+    "latin": "l (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerdeki l sesi.",
+    "sample": "İl, El"
+  },
+  {
+    "char": "𐰢",
+    "code": "U+10C22",
+    "name": "ORKHON EM",
+    "latin": "m",
+    "type": "consonant",
+    "harmony": "neutral",
+    "tip": "Tekil m sesi (kalın ve ince hecelerde ortak).",
+    "sample": "Men (ben), Mengü"
+  },
+  {
+    "char": "𐰣",
+    "code": "U+10C23",
+    "name": "ORKHON AN",
+    "latin": "n (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Kalın hecelerdeki n sesi.",
+    "sample": "Kan (hakan)"
+  },
+  {
+    "char": "𐰤",
+    "code": "U+10C24",
+    "name": "ORKHON AEN",
+    "latin": "n (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerdeki n sesi.",
+    "sample": "İnçü (huzur)"
+  },
+  {
+    "char": "𐰭",
+    "code": "U+10C2D",
+    "name": "ORKHON ENG",
+    "latin": "ŋ (genizsi ng)",
+    "type": "consonant",
+    "harmony": "neutral",
+    "tip": "Sağır nun: burundan çıkan genizsi n/ng sesi.",
+    "sample": "Teŋri, Beŋgü"
+  },
+  {
+    "char": "𐰺",
+    "code": "U+10C3A",
+    "name": "ORKHON AR",
+    "latin": "r (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Kalın hecelerdeki r sesi.",
+    "sample": "Orhun"
+  },
+  {
+    "char": "𐰼",
+    "code": "U+10C3C",
+    "name": "ORKHON AER",
+    "latin": "r (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerdeki r sesi.",
+    "sample": "Er (yiğit), Türk"
+  },
+  {
+    "char": "𐰽",
+    "code": "U+10C3D",
+    "name": "ORKHON AS",
+    "latin": "s (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Kalın hecelerdeki s sesi.",
+    "sample": "Sub (su)"
+  },
+  {
+    "char": "𐰾",
+    "code": "U+10C3E",
+    "name": "ORKHON AES",
+    "latin": "s (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerdeki s sesi.",
+    "sample": "Söz"
+  },
+  {
+    "char": "𐱃",
+    "code": "U+10C43",
+    "name": "ORKHON AT",
+    "latin": "t (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Kalın hecelerdeki t sesi.",
+    "sample": "Taş, Tamga"
+  },
+  {
+    "char": "𐱅",
+    "code": "U+10C45",
+    "name": "ORKHON AET",
+    "latin": "t (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerdeki t sesi.",
+    "sample": "Tengri, Türk"
+  },
+  {
+    "char": "𐰖",
+    "code": "U+10C16",
+    "name": "ORKHON AY",
+    "latin": "y (kalın)",
+    "type": "consonant",
+    "harmony": "back",
+    "tip": "Kalın hecelerdeki y sesi.",
+    "sample": "Yay (ok ve yay)"
+  },
+  {
+    "char": "𐰘",
+    "code": "U+10C18",
+    "name": "ORKHON AEY",
+    "latin": "y (ince)",
+    "type": "consonant",
+    "harmony": "front",
+    "tip": "İnce hecelerdeki y sesi.",
+    "sample": "Yer, Yitig"
+  },
+  {
+    "char": "𐰔",
+    "code": "U+10C14",
+    "name": "ORKHON EZ",
+    "latin": "z",
+    "type": "consonant",
+    "harmony": "neutral",
+    "tip": "z sesi için kullanılan işaret.",
+    "sample": "Oğuz"
+  },
+  {
+    "char": "𐰲",
+    "code": "U+10C32",
+    "name": "ORKHON EC",
+    "latin": "ç",
+    "type": "consonant",
+    "harmony": "neutral",
+    "tip": "ç sesi için kullanılan genel işaret.",
+    "sample": "Çerig (ordu)"
+  },
+  {
+    "char": "𐰿",
+    "code": "U+10C3F",
+    "name": "ORKHON ASH",
+    "latin": "ş",
+    "type": "consonant",
+    "harmony": "neutral",
+    "tip": "ş sesi için kullanılan genel işaret.",
+    "sample": "Taş, Baş"
+  },
+  {
+    "char": "𐰯",
+    "code": "U+10C2F",
+    "name": "ORKHON EP",
+    "latin": "p",
+    "type": "consonant",
+    "harmony": "neutral",
+    "tip": "p sesi için kullanılan işaret.",
+    "sample": "Alp"
+  },
+  {
+    "char": "𐰡",
+    "code": "U+10C21",
+    "name": "ORKHON ELT",
+    "latin": "lt (birleşik)",
+    "type": "compound",
+    "harmony": "neutral",
+    "tip": "lt çift sesini tek işarette birleştiren hece harfi.",
+    "sample": "Altı, İlteber"
+  },
+  {
+    "char": "𐰦",
+    "code": "U+10C26",
+    "name": "ORKHON ENT",
+    "latin": "nt (birleşik)",
+    "type": "compound",
+    "harmony": "neutral",
+    "tip": "nt çift sesini tek işarette birleştiren hece harfi.",
+    "sample": "Ant (yemin)"
+  },
+  {
+    "char": "𐰨",
+    "code": "U+10C28",
+    "name": "ORKHON ENC",
+    "latin": "nç (birleşik)",
+    "type": "compound",
+    "harmony": "neutral",
+    "tip": "nç çift sesini tek işarette birleştiren hece harfi.",
+    "sample": "İnçü (esenlik)"
+  },
+  {
+    "char": "𐰪",
+    "code": "U+10C2A",
+    "name": "ORKHON ENY",
+    "latin": "ny (birleşik)",
+    "type": "compound",
+    "harmony": "neutral",
+    "tip": "ny çift sesini tek işarette birleştiren hece harfi.",
+    "sample": "Koyn"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "asya-hun",
+    "name": "Büyük Hun Devleti (Asya Hun)",
+    "period": "Yaklaşık MÖ 220 – MS 216",
+    "region": "Orta Asya (Ötüken merkezli)",
+    "description": "Tarihte bilinen ilk teşkilatlı Türk devletidir; Mete Han zamanında ordu sistemi ve ıslıklı ok teşkilatlanmıştır.",
+    "symbolType": "dragon"
+  },
+  {
+    "id": "gokturk",
+    "name": "Göktürk Kağanlığı (Kök Türkler)",
+    "period": "Yaklaşık MS 552 – 744",
+    "region": "Orta Asya, Moğolistan ve İpek Yolu",
+    "description": "Tarihte 'Türk' adını resmi devlet adı olarak kullanan ve Orhun Yazıtları'nı diken büyük kağanlıktır.",
+    "symbolType": "wolf"
+  },
+  {
+    "id": "uygur",
+    "name": "Uygur Kağanlığı",
+    "period": "Yaklaşık MS 744 – 840",
+    "region": "Orhun Vadisi ve Tarım Havzası",
+    "description": "Yerleşik hayata, şehirleşmeye, matbaaya ve zengin minyatür sanatına öncülük eden Türk devletidir.",
+    "symbolType": "sun"
+  },
+  {
+    "id": "karahanli",
+    "name": "Karahanlı Devleti",
+    "period": "Yaklaşık MS 840 – 1212",
+    "region": "Maveraünnehir ve Doğu Türkistan",
+    "description": "İslamiyet'i kabul eden ilk büyük Türk devletlerindendir; Kutadgu Bilig ve Dîvânu Lugâti't-Türk bu çağda yazılmıştır.",
+    "symbolType": "crescent"
+  },
+  {
+    "id": "gazneli",
+    "name": "Gazneliler",
+    "period": "Yaklaşık MS 963 – 1186",
+    "region": "Horasan, Afganistan ve Kuzey Hindistan",
+    "description": "Sultan Mahmud devrinde ilim, edebiyat ve mimaride parlak eserler vermiş; Firdevsi ve Biruni'yi himaye etmiştir.",
+    "symbolType": "falcon"
+  },
+  {
+    "id": "buyuk-selcuklu",
+    "name": "Büyük Selçuklu İmparatorluğu",
+    "period": "Yaklaşık MS 1037 – 1194",
+    "region": "Orta Asya, İran, Mezopotamya ve Anadolu",
+    "description": "1071 Malazgirt Zaferi ile Anadolu'nun kapılarını Türklere açan, Nizamiye medreselerini kuran cihan devletidir.",
+    "symbolType": "double-eagle"
+  },
+  {
+    "id": "harezm",
+    "name": "Harezmşahlar Devleti",
+    "period": "Yaklaşık MS 1097 – 1231",
+    "region": "Harezm, Horasan ve İran",
+    "description": "İpek Yolu'nun kilit kavşaklarında güçlü ticaret, bilim ve Celaleddin Harezmşah'ın kahramanlığıyla anılan devlettir.",
+    "symbolType": "star"
+  },
+  {
+    "id": "altin-orda",
+    "name": "Altın Orda Devleti",
+    "period": "Yaklaşık MS 1242 – 1502",
+    "region": "Kafkasya, Deşt-i Kıpçak ve İdil/Volga boyu",
+    "description": "Karadeniz'in kuzeyinde ve İdil boyunda hüküm sürmüş; Doğu Avrupa ticaret yollarını güvenceye almıştır.",
+    "symbolType": "tamga"
+  },
+  {
+    "id": "timur",
+    "name": "Timur İmparatorluğu",
+    "period": "Yaklaşık MS 1370 – 1507",
+    "region": "Semerkant, Horasan ve Orta Doğu",
+    "description": "Semerkant'ı devrin kültür ve astronomi başkenti yapmış; Ali Kuşçu ve Uluğ Bey gibi bilim insanlarını yetiştirmiştir.",
+    "symbolType": "circle-three"
+  },
+  {
+    "id": "babur",
+    "name": "Babür İmparatorluğu (Gürganiye)",
+    "period": "Yaklaşık MS 1526 – 1857",
+    "region": "Hindistan Alt Kıtası ve Afganistan",
+    "description": "Babür Şah'ın kurduğu; Tac Mahal gibi eşsiz mimari harikaları ve zengin divan edebiyatını armağan eden devlettir.",
+    "symbolType": "lotus"
+  },
+  {
+    "id": "osmanli",
+    "name": "Osmanlı İmparatorluğu",
+    "period": "Yaklaşık MS 1299 – 1922",
+    "region": "Üç kıta: Anadolu, Balkanlar ve Orta Doğu",
+    "description": "Altı asır boyunca üç kıtada adalet, hoşgörü ve görkemli medeniyet eserleri inşa eden köklü imparatorluktur.",
+    "symbolType": "crescent-star"
+  },
+  {
+    "id": "turkiye",
+    "name": "Türkiye Cumhuriyeti",
+    "period": "1923 – Günümüz",
+    "region": "Anadolu ve Trakya",
+    "description": "Gazi Mustafa Kemal Atatürk önderliğinde kurulan; çağdaş, demokratik ve atalarının mirasını geleceğe taşıyan cumhuriyettir.",
+    "symbolType": "star16"
+  }
+]

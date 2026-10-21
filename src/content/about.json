@@ -1,0 +1,70 @@
+{
+  "title": "Göktürkçe ve Orhun Yazıtları Hakkında",
+  "disclaimer": "Bu sayfadaki bilgiler çocuklar ve öğrenciler için eğitici ve sadeleştirilmiş bir dille derlenmiştir. Tarihî veriler genel kabul gören kaynaklara dayanmaktadır; kesin araştırmalar için kaynakçada belirtilen kurumlara başvurunuz.",
+  "sections": [
+    {
+      "id": "nedir",
+      "title": "1. Göktürk Yazısı Nedir?",
+      "icon": "book-open",
+      "summary": "Atalarımızın taşlara kazıdığı ilk millî alfabe.",
+      "content": "Göktürk yazısı (veya Orhun alfabesi), Türkçenin bilinen en eski yazılı belgelerinde kullanılan özgün bir alfabe sistemidir. Yaklaşık 38 temel işaretten oluşur ve genellikle sağdan sola doğru okunup yazılır. İşaretlerin keskin ve düz çizgilerden oluşmasının sebebi, o dönemde kâğıt yerine sert taşlara ve kayalara oyulmuş olmalarıdır."
+    },
+    {
+      "id": "yazitlar",
+      "title": "2. Orhun Yazıtları (Bengü Taşlar)",
+      "icon": "monument",
+      "summary": "Moğolistan'ın Orhun Vadisi'nde yükselen ebedî taşlar.",
+      "content": "Bengü Taş, 'sonsuz taş' veya 'ebedî anıt' demektir. En bilinenleri günümüz Moğolistan sınırları içindeki Orhun Vadisi'nde bulunan üç büyük anıttır: Vezir Tonyukuk Yazıtı (yaklaşık 720'ler), Kül Tigin Yazıtı (MS 732) ve ağabeyi Bilge Kağan Yazıtı (MS 735). Bu taşlar birer kitabe olmanın ötesinde, milletin birlik içinde nasıl yaşayacağını anlatan birer öğüttür."
+    },
+    {
+      "id": "cozum",
+      "title": "3. Yazıtlar Nasıl Çözüldü?",
+      "icon": "sparkles",
+      "summary": "1893 yılında bir dilbilimcinin çözdüğü gizem.",
+      "content": "Yüzyıllar boyunca bozkırda sessizce duran bu yazıtlar, 1893 yılında Danimarkalı dilbilimci Vilhelm Thomsen tarafından çözülmüştür. Thomsen, taşın Çince yüzündeki isimlerle Türkçe yüzündeki sık tekrarlanan işaretleri eşleştirmiş ve ilk olarak 'Tengri' (Tanrı) ile 'Türk' kelimelerini okumayı başarmıştır."
+    },
+    {
+      "id": "uyum",
+      "title": "4. Ünlü Uyumu: Kalın ve İnce İşaretler",
+      "icon": "music",
+      "summary": "Türkçenin melodisi taşa nasıl yansıdı?",
+      "content": "Türkçede ünlü uyumu çok önemlidir: Bir kelimede kalın ünlüler (a, ı, o, u) varsa sesler kalın; ince ünlüler (e, i, ö, ü) varsa sesler ince akar. Göktürk alfabesi işte bu melodiye göre tasarlanmıştır! Örneğin 'b', 'd', 't', 'k', 'r' gibi ünsüzlerin kalın kelimeler için ayrı (örneğin 'Taş' kelimesindeki t: 𐱃), ince kelimeler için ayrı (örneğin 'Türk' kelimesindeki t: 𐱅) işaretleri vardır."
+    },
+    {
+      "id": "sozler",
+      "title": "5. Taşların Dilinden: Zamansız Sözler",
+      "icon": "quote",
+      "summary": "Kül Tigin ve Bilge Kağan'ın milletine çağrısı.",
+      "content": "Yazıtlarda yer alan ve günümüz Türkçesine kazandırılan en bilinen sözlerden biri şöyledir:\n\n«Üstte mavi gök basmadıkça, altta yağız yer delinmedikçe, ey Türk milleti, senin ilini ve töreni kim bozabilir?»\n\nBu söz, atalarımızın doğaya ve bağımsızlığa verdiği kutsal değeri özetler."
+    },
+    {
+      "id": "devletler",
+      "title": "6. Türk Devletleri ve Yazı Serüveni",
+      "icon": "shield",
+      "summary": "Hunlardan günümüze binlerce yıllık miras.",
+      "content": "Göktürk Devleti'nin ardından Uygurlar kendi alfabelerini geliştirmiş, Karahanlılar ve Selçuklular döneminde Arap harfleri benimsenmiş, nihayet Cumhuriyet döneminde bugünkü çağdaş Latin alfabesine geçilmiştir. Fakat Göktürk harfleri, köklerimizin ve millî hafızamızın ilk yazılı tapusudur."
+    }
+  ],
+  "sources": [
+    {
+      "name": "Türk Dil Kurumu (TDK)",
+      "url": "https://www.tdk.gov.tr",
+      "desc": "Orhun Yazıtları çevirileri ve Türk dili gramer kaynakları."
+    },
+    {
+      "name": "Türk Tarih Kurumu (TTK)",
+      "url": "https://www.ttk.gov.tr",
+      "desc": "Eski Türk tarihi, arkeolojik bulgular ve yazıt araştırmaları."
+    },
+    {
+      "name": "UNESCO Dünya Mirası",
+      "url": "https://whc.unesco.org",
+      "desc": "Orhun Vadisi Kültürel Peyzajı resmi tescil bilgileri."
+    },
+    {
+      "name": "Unicode Consortium (Old Turkic Block)",
+      "url": "https://www.unicode.org/charts/PDF/U10C00.pdf",
+      "desc": "Eski Türk yazısı için uluslararası resmi Unicode standardı (U+10C00–U+10C4F)."
+    }
+  ]
+}
