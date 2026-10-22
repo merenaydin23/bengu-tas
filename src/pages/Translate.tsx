@@ -58,15 +58,19 @@ export const Translate: React.FC = () => {
           message: 'BengüNet yapay zekâsı harfleri çözümlüyor...'
         })
         try {
-          const { processedCanvas: benguCanvas } = await preprocessImage(canvas, {
-            crop: { x: 0.06, y: 0.15, width: 0.88, height: 0.70 },
+          const { processedCanvas: benguCanvas, hasInk } = await preprocessImage(canvas, {
+            crop: { x: 0.05, y: 0.15, width: 0.90, height: 0.70 },
             maxDimension: 1600,
-            applyThreshold: false
+            applyThreshold: true,
+            adaptive: true,
+            autoCropInk: true
           })
-          const pred = await runBenguNetOcr(benguCanvas)
-          if (pred.text && pred.text.trim().length > 0) {
-            recognizedText = pred.text
-            confidenceScore = pred.confidence
+          if (hasInk) {
+            const pred = await runBenguNetOcr(benguCanvas)
+            if (pred.text && pred.text.trim().length > 0) {
+              recognizedText = pred.text
+              confidenceScore = pred.confidence
+            }
           }
         } catch (netErr) {
           console.warn('BengüNet hatası:', netErr)
@@ -77,75 +81,69 @@ export const Translate: React.FC = () => {
       if (!recognizedText || engineType === 'tesseract') {
         activeEngine = 'Tesseract v5.1 (Türkçe Sözlük)'
 
-        // AŞAMA 1: Odaklanmış Merkez Alan (ROI) + Bradley-Roth Yerel Adaptif Filtreleme (Gölge ve Işık Düşmanı)
+        // AŞAMA 1: Akıllı Mürekkep Alanı Tespiti (Gölge, kâğıt sararması ve boş alanları temizler)
         setOcrProgress({
           status: 'recognizing',
           progress: 45,
-          message: 'El yazısı taranıyor (Gölge filtreleme)...'
+          message: 'El yazısı taranıyor (Gölge ve gürültü filtreleme)...'
         })
 
-        const { processedCanvas: adaptiveRoiCanvas } = await preprocessImage(canvas, {
-          crop: { x: 0.05, y: 0.14, width: 0.90, height: 0.72 },
+        const { processedCanvas: adaptiveCanvas, hasInk } = await preprocessImage(canvas, {
+          crop: { x: 0.04, y: 0.12, width: 0.92, height: 0.76 },
           maxDimension: 1800,
           applyThreshold: true,
-          adaptive: true
+          adaptive: true,
+          autoCropInk: true
         })
 
-        const pass1 = await performOcr(adaptiveRoiCanvas, (update) => setOcrProgress(update), PSM.SINGLE_BLOCK)
+        if (!hasInk) {
+          setOcrProgress({
+            status: 'done',
+            progress: 100,
+            message: 'Kâğıt üzerinde belirgin bir yazı tespit edilemedi. Lütfen kâğıdı yaklaştırınız.'
+          })
+          setIsProcessing(false)
+          return
+        }
 
-        if (pass1.text && pass1.text.trim().length > 0 && pass1.confidence >= 50) {
+        // AŞAMA 1: Tek Satır / Tek Kelime Modu (PSM.SINGLE_LINE)
+        // Özellikle "AYDIN", "TÜRK", "BİLGE KAĞAN" gibi el yazıları için 1000 karakterlik halüsinasyonu %100 engeller
+        let pass1 = await performOcr(adaptiveCanvas, (update) => setOcrProgress(update), PSM.SINGLE_LINE)
+
+        if (pass1.text && pass1.text.trim().length > 0 && pass1.confidence >= 45) {
           recognizedText = pass1.text
           confidenceScore = pass1.confidence
         }
 
-        // AŞAMA 2: Eğer Aşama 1 yetersiz kaldıysa, Yüksek Kontrastlı Gri Tonlama ile Dene
-        if (!recognizedText || confidenceScore < 60) {
-          setOcrProgress({
-            status: 'recognizing',
-            progress: 65,
-            message: 'Yüksek kontrast analizi uygulanıyor...'
-          })
-
-          const { processedCanvas: grayRoiCanvas } = await preprocessImage(canvas, {
-            crop: { x: 0.05, y: 0.14, width: 0.90, height: 0.72 },
-            maxDimension: 1800,
-            applyThreshold: false
-          })
-
-          const pass2 = await performOcr(grayRoiCanvas, undefined, PSM.SINGLE_BLOCK)
-
+        // AŞAMA 2: Eğer Tek Satır yetersiz kaldıysa Blok Modu (PSM.SINGLE_BLOCK) dene
+        if (!recognizedText || confidenceScore < 50) {
+          const pass2 = await performOcr(adaptiveCanvas, undefined, PSM.SINGLE_BLOCK)
           if (pass2.text && pass2.text.trim().length > 0 && pass2.confidence > confidenceScore) {
             recognizedText = pass2.text
             confidenceScore = pass2.confidence
           }
         }
 
-        // AŞAMA 3: Tek Satır Modu (PSM 7) — Özellikle "TÜRK", "BİLGE" gibi tek satırlık kelimeler için
-        if (!recognizedText || confidenceScore < 50) {
-          const pass3 = await performOcr(adaptiveRoiCanvas, undefined, PSM.SINGLE_LINE)
-          if (pass3.text && pass3.text.trim().length > 0 && pass3.confidence > confidenceScore) {
-            recognizedText = pass3.text
-            confidenceScore = pass3.confidence
-          }
-        }
-
-        // AŞAMA 4: Geniş Açı / Tam Kare Yedekleme (Kullanıcı kâğıdı kenarda tuttuysa)
+        // AŞAMA 3: Geniş Açı Yedekleme (Kullanıcı kâğıdı kenarda tuttuysa)
         if (!recognizedText) {
           setOcrProgress({
             status: 'recognizing',
             progress: 85,
             message: 'Geniş açı ile son tarama yapılıyor...'
           })
-          const { processedCanvas: fullAdaptiveCanvas } = await preprocessImage(canvas, {
+          const { processedCanvas: fullCanvas, hasInk: fullHasInk } = await preprocessImage(canvas, {
             crop: { x: 0, y: 0, width: 1, height: 1 },
             maxDimension: 1800,
             applyThreshold: true,
-            adaptive: true
+            adaptive: true,
+            autoCropInk: true
           })
-          const pass4 = await performOcr(fullAdaptiveCanvas, undefined, PSM.SINGLE_BLOCK)
-          if (pass4.text && pass4.text.trim().length > 0) {
-            recognizedText = pass4.text
-            confidenceScore = pass4.confidence
+          if (fullHasInk) {
+            const pass3 = await performOcr(fullCanvas, undefined, PSM.SINGLE_LINE)
+            if (pass3.text && pass3.text.trim().length > 0) {
+              recognizedText = pass3.text
+              confidenceScore = pass3.confidence
+            }
           }
         }
       }

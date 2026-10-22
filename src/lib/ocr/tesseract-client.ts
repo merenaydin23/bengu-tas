@@ -159,25 +159,35 @@ export async function performOcr(
   const { data } = await worker.recognize(imageSource)
 
   const cleaned = cleanOcrText(data.text)
-  const confidence = Math.round(data.confidence || 0)
-  const lowConfidence = confidence < 65
+  let confidence = Math.round(data.confidence || 0)
 
   const words = (data.words || []).map(w => ({
     text: cleanOcrText(w.text),
     confidence: Math.round(w.confidence || 0)
   })).filter(w => w.text.length > 0)
 
+  // Halüsinasyon ve Aşırı Gürültü Koruması:
+  // Boş kâğıtta sensör gürültüsünden türeyen 1000 karakterlik veya saçma tekil harfli çıktıyı engelle
+  const isHallucination = (cleaned.length > 100 && words.length > 15 && confidence < 65) ||
+                          (words.length >= 6 && words.filter(w => w.text.length === 1).length > words.length * 0.6)
+
+  const finalText = isHallucination ? '' : cleaned
+  if (isHallucination) {
+    confidence = Math.min(confidence, 25)
+  }
+  const lowConfidence = confidence < 65
+
   onProgress?.({
     status: 'done',
     progress: 100,
-    message: 'Okuma tamamlandı.'
+    message: isHallucination ? 'Gürültü filtrelendi.' : 'Okuma tamamlandı.'
   })
 
   return {
-    text: cleaned,
+    text: finalText,
     confidence,
     lowConfidence,
-    words
+    words: isHallucination ? [] : words
   }
 }
 

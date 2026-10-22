@@ -86,17 +86,22 @@ def train():
         
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), "train/bengu_net.pt")
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            torch.save(model.state_dict(), os.path.join(script_dir, "bengu_net.pt"))
             
     total_duration = time.time() - start_time
     print(f"\nEğitim Tamamlandı! Süre: {total_duration:.1f} sn | En İyi Val Başarımı: %{best_val_acc:.2f}")
     
     # 3. ONNX Formatına Dışa Aktarma (Web Entegrasyonu)
-    os.makedirs("public/model", exist_ok=True)
-    onnx_path = "public/model/bengu_net.onnx"
-    classes_path = "public/model/classes.json"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    model_dir = os.path.join(project_root, "public", "model")
+    os.makedirs(model_dir, exist_ok=True)
+    onnx_path = os.path.join(model_dir, "bengu_net.onnx")
+    classes_path = os.path.join(model_dir, "classes.json")
+    weights_path = os.path.join(script_dir, "bengu_net.pt")
     
-    model.load_state_dict(torch.load("train/bengu_net.pt"))
+    model.load_state_dict(torch.load(weights_path))
     model.eval()
     
     dummy_input = torch.randn(1, 1, 32, 32, device=device)
@@ -121,3 +126,4 @@ def train():
 
 if __name__ == "__main__":
     train()
+

@@ -8,10 +8,13 @@ sys.stderr.reconfigure(encoding='utf-8')
 from model import BenguNet, CLASSES, NUM_CLASSES
 
 def export_onnx():
-    os.makedirs("public/model", exist_ok=True)
-    onnx_path = "public/model/bengu_net.onnx"
-    classes_path = "public/model/classes.json"
-    weights_path = "train/bengu_net.pt"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    model_dir = os.path.join(project_root, "public", "model")
+    os.makedirs(model_dir, exist_ok=True)
+    onnx_path = os.path.join(model_dir, "bengu_net.onnx")
+    classes_path = os.path.join(model_dir, "classes.json")
+    weights_path = os.path.join(script_dir, "bengu_net.pt")
     
     if not os.path.exists(weights_path):
         print(f"Hata: {weights_path} bulunamadı!")
@@ -24,23 +27,22 @@ def export_onnx():
     dummy_input = torch.randn(1, 1, 32, 32)
     print(f"Model yükleme tamamlandı. ONNX'e aktarılıyor: {onnx_path}")
 
-    # PyTorch ONNX export (TorchScript / Legacy engine)
+    # PyTorch ONNX export (Self-contained single file)
     torch.onnx.export(
         model,
         dummy_input,
         onnx_path,
         export_params=True,
-        opset_version=14,
-        do_constant_folding=True,
+        opset_version=17,
         input_names=['input'],
         output_names=['output'],
-        dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}}
+        dynamo=False
     )
 
     with open(classes_path, "w", encoding="utf-8") as f:
         json.dump(CLASSES, f, ensure_ascii=False, indent=2)
 
-    print(f"Tebrikler! ONNX modeli ve sınıflar hazır: {onnx_path}")
+    print(f"Tebrikler! Tek dosya ONNX modeli ve sınıflar hazır: {onnx_path}")
 
 if __name__ == "__main__":
     export_onnx()
